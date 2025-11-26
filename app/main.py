@@ -1,13 +1,16 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+from app.db.session import Base, engine
+
+# from app.api.v1 import router as v1_router
+
+app = FastAPI(title="API's for Social Media App.")
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/check", summary="Public Endpoint to Check if Server Health.")
+async def check():
+    return {"Status": "Good"}
 
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+# # Register Routes
+# app.include_router(v1_router, prefix="/api/v1/", tags=["Version 1 API"])

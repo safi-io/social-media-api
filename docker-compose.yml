@@ -4,13 +4,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/code/app
+      - ./:/code/
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: myuser
-      DB_PASSWORD: mypassword
-      DB_NAME: web_project
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres:16

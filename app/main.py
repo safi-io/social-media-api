@@ -5,7 +5,7 @@ from app.api.v1 import router as v1_router
 app = FastAPI(title="API's for Social Media App.")
 
 
-@app.get("/check", summary="Public Endpoint to Check if Server Health.")
+@app.get("/check", summary="Public Endpoint to Check the Server Health.")
 async def check():
     return {"Status": "Good"}
 

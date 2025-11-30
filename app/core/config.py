@@ -2,12 +2,17 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Environment Variables
+    # Database
     DB_HOST: str
     DB_PORT: str
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
+
+    # JWT
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: str
 
     @property
     def DATABASE_URL(self) -> str:

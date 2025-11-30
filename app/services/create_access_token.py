@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime, UTC
-from jose import jwt, JWTError
+from jose import jwt
+from app.core.config import settings
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):

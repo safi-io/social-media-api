@@ -1,12 +1,11 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import datetime
 
 
 class UserBase(BaseModel):
     username: str
     name: str
-    email: EmailStr
+    email: str
     avatar_url: Optional[str] = None
 
 
@@ -24,11 +23,16 @@ class UserUpdate(BaseModel):
 
 class UserOut(UserBase):
     id: int
-    last_login_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True
 
 
-class UserAuthOut(UserOut):
+class UserAuthOut(BaseModel):
+    id: int
+    username: str
+    name: str
+    email: str
+
     token: str
+    token_type: str = "bearer"

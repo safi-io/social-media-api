@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
-
-from app.schemas.follow import FollowMinimal, FollowRequest
-from app.services.get_current_user import get_current_user
+from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.follow import Follow as follow_model
 from app.models.user import User as user_model
-from sqlalchemy.orm import Session
+from app.schemas.follow import FollowMinimal, FollowRequest
+from app.services.get_current_user import get_current_user
 
 router = APIRouter()
 

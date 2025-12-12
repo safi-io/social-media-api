@@ -1,12 +1,10 @@
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import jwt
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_401_UNAUTHORIZED
 
 from app.core.config import settings
 from app.db.session import get_db
-
 from app.models.user import User as user_model
 
 # Tell FastAPI where login tokens are obtained

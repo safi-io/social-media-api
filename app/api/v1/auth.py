@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,7 +13,6 @@ from app.models.user_profile import UserProfile as user_profile_model
 from app.schemas.user import UserCreate, UserOut, UserAuthOut
 from app.services.create_access_token import create_access_token
 from app.services.password_hash import *
-import re
 
 router = APIRouter()
 

@@ -1,7 +1,8 @@
 import enum
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
+from sqlalchemy.orm import relationship
 
 from app.db.session import Base
 
@@ -36,5 +37,20 @@ class Project(Base):
     external_urls = Column(JSONB, default=dict)
     analytics = Column(JSONB, default=dict)
 
+    tech_stack = Column(ARRAY(String), default=list)
+
+    # Relationship
+    _assigned_members_relationships = relationship(
+        "ProjectMember",
+        foreign_keys="[ProjectMember.project_id]",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    @property
+    def assigned_members(self):
+        return [mem.user for mem in self._assigned_members_relationships]

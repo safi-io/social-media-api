@@ -14,8 +14,16 @@ class ProjectBase(BaseModel):
 
     visibility: Optional[VisibilityStatusEnum] = VisibilityStatusEnum.PUBLIC
 
-    external_urls: Optional[Dict] = {}
-    analytics: Optional[Dict] = {}
+    external_urls: Optional[Dict] = {
+        "github_url": None,
+        "live_demo_url": None,
+        "cloudinary_url": None
+    }
+
+    analytics: Optional[Dict] = {
+        "bookmarks_count": 0,
+        "views_count": 0
+    }
 
     tech_stack: Optional[list[str]] = []
     assignments: Optional[Dict[str, str]] = None
@@ -47,6 +55,7 @@ class Project(ProjectBase):
 
     class Config:
         from_attributes = True
+        extra = "ignore"
 
 
 class ProjectDelete(BaseModel):

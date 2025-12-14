@@ -31,5 +31,5 @@ def upload_picture(
 
 
 @router.get("/get-all-users", summary="Returning All Users")
-def user_all(db: Session = Depends(get_db)):
+def user_all(db: Session = Depends(get_db), current_user=Depends(get_current_user),):
     return db.query(user_model).all()

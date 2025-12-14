@@ -17,7 +17,8 @@ class ProjectBase(BaseModel):
     external_urls: Optional[Dict] = {
         "github_url": None,
         "live_demo_url": None,
-        "cloudinary_url": None
+        "cloudinary_url": None,
+        "local_generated_webpage": None
     }
 
     analytics: Optional[Dict] = {

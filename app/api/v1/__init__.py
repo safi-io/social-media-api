@@ -25,6 +25,11 @@ from app.api.v1.project import router as project_router
 router.include_router(project_router, prefix="/projects", tags=["Projects"])
 
 # Websockets
+
 from app.api.v1.websockets import router as websockets_router
 
 router.include_router(websockets_router, prefix="/ws", tags=["Websockets"])
+
+# Models
+from app.api.v1.model import router as model_router
+router.include_router(model_router, prefix="/models", tags=["Generative AI"])

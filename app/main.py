@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import router as v1_router
@@ -14,6 +15,14 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="API's for Social Media App.")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 app.mount(
     "/projects",

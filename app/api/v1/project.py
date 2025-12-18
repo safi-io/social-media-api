@@ -122,3 +122,23 @@ def my_projects(current_user=Depends(get_current_user), db: Session = Depends(ge
         result.append(proj_data)
 
     return result
+
+
+@router.get("/user/{user_id}", response_model=list[Project])
+def my_projects(user_id: int, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    project_ids = [pid[0] for pid in db.query(project_member_model.project_id)
+    .filter(project_member_model.user_id == user_id)
+    .all()]
+
+    projects = db.query(project_model).filter(project_model.id.in_(project_ids)).all()
+
+    result = []
+    for project in projects:
+        members = db.query(project_member_model).filter(project_member_model.project_id == project.id).all()
+        assignments = {str(member.user_id): member.role for member in members}
+
+        proj_data = Project.from_orm(project).dict()
+        proj_data["assignments"] = assignments
+        result.append(proj_data)
+
+    return result

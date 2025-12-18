@@ -31,6 +31,13 @@ def add_followers(
     if current_user.id == data.beta_user_id:
         raise HTTPException(status_code=400, detail="You can't Follow Yourself.")
 
+    # Get the List of already Followed Users
+    following_list = current_user.followings
+    following_id_list = [x.id for x in following_list]
+
+    if data.beta_user_id in following_id_list:
+        raise HTTPException(status_code=400, detail="You are already following this user.")
+
     try:
 
         follow_req = follow_model(

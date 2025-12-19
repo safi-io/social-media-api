@@ -2,7 +2,6 @@ import json
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.params import Depends
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -81,27 +80,28 @@ def create_project(
 
 
 @router.post("/remove-project")
-def delete_project(data: ProjectDelete,
-                   current_user=Depends(get_current_user),
-                   db: Session = Depends(get_db)):
-    current_user_id = current_user.id
-    project_to_delete = db.query(project_model).filter(
-        and_(
-            project_model.id == data.project_id,
-            project_model.owner_id == current_user_id
-        ))
+def delete_project(
+        data: ProjectDelete,
+        current_user=Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    project = db.query(project_model).filter(
+        project_model.id == data.project_id
+    ).first()
 
-    if not project_to_delete:
-        raise HTTPException(status_code=404, detail="You can't Delete this Project.")
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
 
-    deleted = project_to_delete.delete()
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not the owner of this project."
+        )
 
-    if deleted == 0:
-        raise HTTPException(status_code=500, detail="Unable to Delete this Project.")
-
+    db.delete(project)
     db.commit()
 
-    return {"message": "Deleted Successfully."}
+    return {"message": "Deleted successfully."}
 
 
 @router.get("/my-projects", response_model=list[Project])

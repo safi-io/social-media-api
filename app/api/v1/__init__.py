@@ -32,4 +32,10 @@ router.include_router(websockets_router, prefix="/ws", tags=["Websockets"])
 
 # Models
 from app.api.v1.model import router as model_router
+
 router.include_router(model_router, prefix="/models", tags=["Generative AI"])
+
+# Posts
+from app.api.v1.posts import router as posts_router
+
+router.include_router(posts_router, prefix="/posts", tags=["Post, Post Comments, Post Reactions"])

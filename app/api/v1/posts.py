@@ -225,3 +225,4 @@ def get_user_posts(
     )
 
     return posts
+

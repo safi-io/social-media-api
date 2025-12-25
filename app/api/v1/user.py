@@ -1,3 +1,6 @@
+from typing import Any
+from pydantic import HttpUrl
+
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
@@ -124,9 +127,22 @@ def update_my_profile(
         raise HTTPException(status_code=400, detail="No data provided to update")
 
     for key, value in update_data.items():
-        setattr(profile, key, value)
+        setattr(profile, key, normalize_for_db(value))
 
     db.commit()
     db.refresh(profile)
 
     return profile
+
+
+def normalize_for_db(value: Any):
+    if isinstance(value, HttpUrl):
+        return str(value)
+
+    if isinstance(value, dict):
+        return {k: normalize_for_db(v) for k, v in value.items()}
+
+    if isinstance(value, list):
+        return [normalize_for_db(v) for v in value]
+
+    return value

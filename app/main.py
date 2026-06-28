@@ -7,14 +7,13 @@ from fastapi.staticfiles import StaticFiles
 from app.api.v1 import router as v1_router
 from app.db.session import Base, engine
 
-
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     Base.metadata.create_all(bind=engine)
     yield
 
 
-app = FastAPI(title="API's for Social Media App.")
+app = FastAPI(title="API's for Social Media App.", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

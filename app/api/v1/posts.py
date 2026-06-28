@@ -39,7 +39,10 @@ def create_post(
     db.add(post)
     db.flush()
 
+    print("hellllo1")
+
     if images:
+        print("hellllo2")
         folder = f"posts/{post.id}"
         for img in images:
             url = upload_image(img, folder)

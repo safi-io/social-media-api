@@ -23,7 +23,6 @@ def upload_picture(
 ):
     validate_image(profile_image)
     url = upload_image(profile_image, "user_profile_images")
-
     current_user.avatar_url = url
 
     db.commit()

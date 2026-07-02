@@ -1,6 +1,11 @@
+x-logging: &default-logging
+  driver: fluentd
+  options:
+    fluentd-address: localhost:24225
 services:
   api:
     build: .
+    # logging: *default-logging
     ports:
       - "8100:8000"
     volumes:
@@ -10,9 +15,11 @@ services:
 
     depends_on:
       - postgres
+      - otel-collector
 
   postgres:
     image: postgres:16
+    # logging: *default-logging
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
@@ -21,6 +28,40 @@ services:
       - "6432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    depends_on:
+      - otel-collector
 
+  otel-collector:
+    image: "docker.clickhouse.com/clickhouse/clickstack-otel-collector:2"
+    environment:
+      CLICKHOUSE_ENDPOINT: "tcp://ch-server:9000?dial_timeout=10s"
+      HYPERDX_OTEL_EXPORTER_CLICKHOUSE_DATABASE: "default"
+      HYPERDX_LOG_LEVEL: "info"
+      OPAMP_SERVER_URL: "http://app:4320"
+      CUSTOM_OTELCOL_CONFIG_FILE: "/etc/otelcol-contrib/custom.config.yaml"
+      HYPERDX_OTEL_EXPORTER_CREATE_LEGACY_SCHEMA: "true"
+    ports:
+      - "13133:13133"
+      - "24225:24225"
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+    restart: always
+    group_add:
+      - "999"
+    volumes:
+      - /var/log/journal:/var/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./custom.config.yaml:/etc/otelcol-contrib/custom.config.yaml
+    networks:
+      - default
+      - clickstack_net
+  
 volumes:
   pgdata:
+
+networks:
+  default:
+  clickstack_net:
+    external: true
+    name: clickstack_internal

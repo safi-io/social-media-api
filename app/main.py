@@ -5,7 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import router as v1_router
+from app.core.logging import configure_logging
 from app.db.session import Base, engine
+from app.middlewares.request_logging import request_logging_middleware
+
+configure_logging()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -14,6 +18,8 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="API's for Social Media App.", lifespan=lifespan)
+
+app.middleware("http")(request_logging_middleware)
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,0 +1,33 @@
+processors:
+  transform/enrich:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["service.name"], log.attributes["compose.stack"]) where log.attributes["compose.stack"] != nil
+          - set(resource.attributes["service.instance.id"], log.attributes["container_id"]) where log.attributes["container_id"] != nil
+          - set(resource.attributes["container.name"], log.attributes["container_name"]) where log.attributes["container_name"] != nil
+          - set(resource.attributes["deployment.environment"], "docker-compose")
+          - set(log.severity_text, "INFO") where IsMatch(log.body, "request_completed")
+          - set(log.severity_number, SEVERITY_NUMBER_INFO) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["http.request.method"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["request_method"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["url.path"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["request_path"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["http.response.status_code"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["status_code"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["client.ip"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["client_ip"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["request.id"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["request_id"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["duration.ms"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["duration_ms"]) where IsMatch(log.body, "request_completed")
+          - set(log.attributes["user_agent"], ExtractPatterns(log.body, "request_completed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) status_code=(?P<status_code>\\d+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+) user_agent=(?P<user_agent>.*)$")["user_agent"]) where IsMatch(log.body, "request_completed")
+          - set(log.severity_text, "ERROR") where IsMatch(log.body, "request_failed")
+          - set(log.severity_number, SEVERITY_NUMBER_ERROR) where IsMatch(log.body, "request_failed")
+          - set(log.attributes["http.request.method"], ExtractPatterns(log.body, "request_failed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+)$")["request_method"]) where IsMatch(log.body, "request_failed")
+          - set(log.attributes["url.path"], ExtractPatterns(log.body, "request_failed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+)$")["request_path"]) where IsMatch(log.body, "request_failed")
+          - set(log.attributes["client.ip"], ExtractPatterns(log.body, "request_failed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+)$")["client_ip"]) where IsMatch(log.body, "request_failed")
+          - set(log.attributes["request.id"], ExtractPatterns(log.body, "request_failed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+)$")["request_id"]) where IsMatch(log.body, "request_failed")
+          - set(log.attributes["duration.ms"], ExtractPatterns(log.body, "request_failed method=(?P<request_method>\\w+) path=(?P<request_path>[^ ]+) client_ip=(?P<client_ip>[^ ]+) request_id=(?P<request_id>[^ ]+) duration_ms=(?P<duration_ms>\\d+\\.\\d+)$")["duration_ms"]) where IsMatch(log.body, "request_failed")
+
+service:
+  pipelines:
+    logs/fluentd:
+      receivers: [fluentforward]
+      processors: [memory_limiter, transform/enrich, batch]
+      exporters: [clickhouse]
